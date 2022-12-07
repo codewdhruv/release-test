@@ -43,6 +43,4 @@ pipeline:
                     connectorRef: harnesscommunitydocker
                     image: harnesscommunity/test-release
                     shell: Sh
-                    command: |-
-                      ./build-images.sh
-                      echo 'export DOCKER_PASS=$DOCKER_TOKEN' >> $BASH_ENV
+                    command: ./build-images.sh
