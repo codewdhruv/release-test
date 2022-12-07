@@ -64,11 +64,15 @@ pipeline:
                   name: SNYK scans
                   identifier: SNYK_scans
                   spec:
-                    shell: Sh
-                    connectorRef: org.Dockerhub
+                    connectorRef: DhrubajyotiDocker
                     image: snyk/snyk-cli:1.745.0-maven-3.5.4
-                    command: echo "nice"
+                    shell: Sh
+                    command: |-
+                      snyk config set api=$SNYK_TOKEN
+                      snyk test
                     privileged: true
+                    envVariables:
+                      SNYK_TOKEN: <+secrets.getValue("org.SNYK_TOKEN")>
               - step:
                   type: BuildAndPushDockerRegistry
                   name: Build and Push an image to Docker Registry
