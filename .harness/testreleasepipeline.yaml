@@ -37,7 +37,7 @@ pipeline:
                       sudo apt-get install -y qemu-user-static binfmt-support
               - step:
                   type: Plugin
-                  name: Scan docker image
+                  name: Pull image
                   identifier: Scan_docker_image
                   spec:
                     connectorRef: harnesscommunitydocker
@@ -45,7 +45,7 @@ pipeline:
                     privileged: true
               - step:
                   type: Run
-                  name: Install Docker Scan
+                  name: Install Docker Scan Plugin
                   identifier: Install_Docker_Scan
                   spec:
                     shell: Sh
@@ -54,14 +54,14 @@ pipeline:
                       docker scan --accept-license --version
               - step:
                   type: Run
-                  name: Run scans
+                  name: Scan Dockerfile
                   identifier: Run_scans
                   spec:
                     shell: Sh
                     command: docker scan --file Dockerfile docker-scan:e2e
               - step:
                   type: Run
-                  name: SNYK scans
+                  name: SNYK SCAN
                   identifier: SNYK_scans
                   spec:
                     connectorRef: DhrubajyotiDocker
