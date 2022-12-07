@@ -40,6 +40,8 @@ pipeline:
                   name: Build Dockerfiles
                   identifier: Build_Dockerfiles
                   spec:
+                    connectorRef: harnesscommunitydocker
+                    image: harnesscommunity/test-release
                     shell: Sh
                     command: |-
                       ./build-images.sh
