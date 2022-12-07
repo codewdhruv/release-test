@@ -72,7 +72,7 @@ pipeline:
                       snyk test
                     privileged: true
                     envVariables:
-                      SNYK_TOKEN: <+secrets.getValue("org.SNYK_TOKEN")>
+                      SNYK_TOKEN: <+secrets.getValue("SNYK_TOKEN")>
               - step:
                   type: BuildAndPushDockerRegistry
                   name: Build and Push an image to Docker Registry
