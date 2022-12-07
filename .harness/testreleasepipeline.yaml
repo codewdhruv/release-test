@@ -1,0 +1,37 @@
+pipeline:
+  name: test-release-pipeline
+  identifier: testreleasepipeline
+  projectIdentifier: DhrubaCI
+  orgIdentifier: default
+  tags: {}
+  properties:
+    ci:
+      codebase:
+        connectorRef: dhrubaaccountconnector
+        repoName: release-test
+        build: <+input>
+  stages:
+    - stage:
+        name: Builds
+        identifier: Builds
+        description: ""
+        type: CI
+        spec:
+          cloneCodebase: true
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+            spec: {}
+          execution:
+            steps:
+              - step:
+                  type: Run
+                  name: Install Docker buildx dependencies
+                  identifier: Install_Docker_buildx_dependencies
+                  spec:
+                    shell: Sh
+                    command: |-
+                      sudo apt-get update
+                      sudo apt-get install -y qemu-user-static binfmt-support
