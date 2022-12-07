@@ -36,11 +36,12 @@ pipeline:
                       sudo apt-get update
                       sudo apt-get install -y qemu-user-static binfmt-support
               - step:
-                  type: Run
-                  name: Build Dockerfiles
-                  identifier: Build_Dockerfiles
+                  type: BuildAndPushDockerRegistry
+                  name: Build and Push an image to Docker Registry
+                  identifier: BuildandPushanimagetoDockerRegistry
                   spec:
                     connectorRef: harnesscommunitydocker
-                    image: harnesscommunity/test-release
-                    shell: Sh
-                    command: ./build-images.sh
+                    repo: harnesscommunity/test-release
+                    tags:
+                      - latest
+                    dockerfile: Dockerfile
