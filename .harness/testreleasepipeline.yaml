@@ -53,6 +53,13 @@ pipeline:
                       apt-get update && apt-get install docker-scan-plugin
                       docker scan --accept-license --version
               - step:
+                  type: Run
+                  name: Run scans
+                  identifier: Run_scans
+                  spec:
+                    shell: Sh
+                    command: docker scan --file Dockerfile docker-scan:e2e
+              - step:
                   type: BuildAndPushDockerRegistry
                   name: Build and Push an image to Docker Registry
                   identifier: BuildandPushanimagetoDockerRegistry
