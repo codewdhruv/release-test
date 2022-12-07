@@ -44,6 +44,15 @@ pipeline:
                     image: harnesscommunity/test-release
                     privileged: true
               - step:
+                  type: Run
+                  name: Install Docker Scan
+                  identifier: Install_Docker_Scan
+                  spec:
+                    shell: Sh
+                    command: |-
+                      apt-get update && apt-get install docker-scan-plugin
+                      docker scan --accept-license --version
+              - step:
                   type: BuildAndPushDockerRegistry
                   name: Build and Push an image to Docker Registry
                   identifier: BuildandPushanimagetoDockerRegistry
