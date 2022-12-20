@@ -4,82 +4,106 @@ pipeline:
   projectIdentifier: DhrubaCI
   orgIdentifier: default
   tags: {}
-  properties:
-    ci:
-      codebase:
-        connectorRef: dhrubaaccountconnector
-        repoName: release-test
-        build: <+input>
   stages:
     - stage:
-        name: Builds
-        identifier: Builds
-        description: ""
+        variables:
+          - name: SNYK_IMAGE
+            type: String
+            value: snyk/snyk-cli:1.745.0-maven-3.5.4
+          - name: MAVEN_IMAGE
+            type: String
+            value: maven:3.8.3-openjdk-11-slim
         type: CI
         spec:
+          execution:
+            steps:
+              - parallel:
+                  - step:
+                      type: Security
+                      name: Snyk Test
+                      identifier: Snyk_Test
+                      spec:
+                        privileged: true
+                        settings:
+                          policy_type: orchestratedScan
+                          scan_type: repository
+                          product_name: snyk
+                          product_config_name: default
+                          product_access_token: <+secrets.getValue("org.SNYK_TOKEN")>
+                          repository_project: release-test
+                          repository_branch: main
+                  - step:
+                      type: Run
+                      name: Snyk Code Test
+                      identifier: Snyk_Code_Test
+                      spec:
+                        connectorRef: account.harnessImage
+                        image: <+CI.variables.SNYK_IMAGE>
+                        shell: Sh
+                        command: |-
+                          snyk config set api=$SNYK_TOKEN
+                          snyk code test || true
+                        privileged: true
+                        envVariables:
+                          SNYK_TOKEN: <+secrets.getValue("org.SNYK_TOKEN")>
+              - step:
+                  type: Run
+                  name: Build Container
+                  identifier: Build_Container
+                  spec:
+                    connectorRef: account.harnessImage
+                    image: docker:dind
+                    shell: Sh
+                    command: docker build -t harnesscommunity/test-release:<+pipeline.sequenceId> -f Dockerfile.harness .
+                    imagePullPolicy: Always
+              - step:
+                  type: Security
+                  name: Snyk Container Scan
+                  identifier: Snyk_Container_Scan
+                  spec:
+                    privileged: true
+                    settings:
+                      policy_type: orchestratedScan
+                      scan_type: container
+                      product_name: snyk
+                      product_config_name: default
+                      container_project: harnesscommunity/test-release
+                      container_tag: <+pipeline.sequenceId>
+                      container_type: local
+                      container_domain: docker.io
+                    imagePullPolicy: Always
           cloneCodebase: true
+          serviceConfig:
+            serviceRef: ""
+            serviceDefinition:
+              type: Kubernetes
+              spec:
+                variables: []
+          serviceDependencies:
+            - identifier: DiND
+              name: DiND
+              type: Service
+              spec:
+                connectorRef: account.harnessImage
+                image: docker:dind
+                privileged: true
+                resources:
+                  limits:
+                    memory: 2.0Gi
+                    cpu: "1.0"
+          sharedPaths:
+            - /var/run
           platform:
             os: Linux
             arch: Amd64
           runtime:
             type: Cloud
             spec: {}
-          execution:
-            steps:
-              - step:
-                  type: Run
-                  name: Install Docker buildx dependencies
-                  identifier: Install_Docker_buildx_dependencies
-                  spec:
-                    shell: Sh
-                    command: |-
-                      sudo apt-get update
-                      sudo apt-get install -y qemu-user-static binfmt-support
-              - step:
-                  type: Plugin
-                  name: Pull image
-                  identifier: Scan_docker_image
-                  spec:
-                    connectorRef: harnesscommunitydocker
-                    image: harnesscommunity/test-release
-                    privileged: true
-              - step:
-                  type: Run
-                  name: Install Docker Scan Plugin
-                  identifier: Install_Docker_Scan
-                  spec:
-                    shell: Sh
-                    command: |-
-                      apt-get update && apt-get install docker-scan-plugin
-                      docker scan --accept-license --version
-              - step:
-                  type: Run
-                  name: Scan Dockerfile
-                  identifier: Run_scans
-                  spec:
-                    shell: Sh
-                    command: docker scan --file Dockerfile docker-scan:e2e
-              - step:
-                  type: Run
-                  name: SNYK SCAN
-                  identifier: SNYK_scans
-                  spec:
-                    connectorRef: DhrubajyotiDocker
-                    image: snyk/snyk-cli:1.745.0-maven-3.5.4
-                    shell: Sh
-                    command: |-
-                      snyk config set api=$SNYK_TOKEN
-                      snyk test
-                    privileged: true
-                    envVariables:
-                      SNYK_TOKEN: <+secrets.getValue("SNYK_TOKEN")>
-              - step:
-                  type: BuildAndPushDockerRegistry
-                  name: Build and Push an image to Docker Registry
-                  identifier: BuildandPushanimagetoDockerRegistry
-                  spec:
-                    connectorRef: harnesscommunitydocker
-                    repo: harnesscommunity/test-release
-                    tags:
-                      - latest
-                    dockerfile: Dockerfile
+        name: CI
+        identifier: CI
+  properties:
+    ci:
+      codebase:
+        connectorRef: dhrubaaccountconnector
+        repoName: release-test
+        build: <+input>
