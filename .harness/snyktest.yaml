@@ -46,13 +46,6 @@ pipeline:
                     dockerfile: Dockerfile
               - step:
                   type: Run
-                  name: scan dockerfile
-                  identifier: scan_dockerfile
-                  spec:
-                    shell: Sh
-                    command: docker scan harnesscommunity/test-release
-              - step:
-                  type: Run
                   name: Container Test
                   identifier: Container_Test
                   spec:
