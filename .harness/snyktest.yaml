@@ -25,7 +25,7 @@ pipeline:
                   name: test
                   identifier: test
                   spec:
-                    connectorRef: DhrubajyotiDocker
+                    connectorRef: harnesscommunitydocker
                     image: <+CI.variables.SNYK_IMAGE>
                     shell: Sh
                     command: |-
