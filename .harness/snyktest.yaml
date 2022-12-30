@@ -7,7 +7,7 @@ pipeline:
   properties:
     ci:
       codebase:
-        connectorRef: gitconnector
+        connectorRef: dhrubaaccountconnector
         repoName: release-test
         build: <+input>
   stages:
@@ -18,14 +18,6 @@ pipeline:
         type: CI
         spec:
           cloneCodebase: true
-          infrastructure:
-            type: KubernetesDirect
-            spec:
-              connectorRef: k8scluster
-              namespace: harness-delegate-ng
-              automountServiceAccountToken: true
-              nodeSelector: {}
-              os: Linux
           execution:
             steps:
               - step:
@@ -33,7 +25,7 @@ pipeline:
                   name: test
                   identifier: test
                   spec:
-                    connectorRef: dockerconnectorharnesscommunity
+                    connectorRef: DhrubajyotiDocker
                     image: <+CI.variables.SNYK_IMAGE>
                     shell: Sh
                     command: |-
@@ -42,6 +34,12 @@ pipeline:
                     privileged: true
                     envVariables:
                       SNYK_TOKEN: <+secrets.getValue("SNYK_TOKEN")>N")>
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+            spec: {}
   variables:
     - name: SNYK_IMAGE
       type: String
