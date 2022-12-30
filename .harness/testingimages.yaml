@@ -40,7 +40,7 @@ pipeline:
                       snyk code test || true
                     privileged: true
                     envVariables:
-                      SNYK_TOKEN: <+secrets.getValue("org.SNYK_TOKEN")>N")>
+                      SNYK_TOKEN: <+secrets.getValue("SNYK_TOKEN")>N")>
   variables:
     - name: SNYK_IMAGE
       type: String
