@@ -35,6 +35,16 @@ pipeline:
                     envVariables:
                       SNYK_TOKEN: <+secrets.getValue("SNYK_TOKEN")>N")>
               - step:
+                  type: BuildAndPushDockerRegistry
+                  name: build and push image to docker
+                  identifier: build_and_push_image_to_docker
+                  spec:
+                    connectorRef: DhrubajyotiDocker
+                    repo: harnesscommunity/test-release
+                    tags:
+                      - stable
+                    dockerfile: Dockerfile
+              - step:
                   type: Run
                   name: Container Test
                   identifier: Container_Test
