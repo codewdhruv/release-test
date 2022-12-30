@@ -33,6 +33,6 @@ pipeline:
                   identifier: test
                   spec:
                     connectorRef: dockerconnectorharnesscommunity
-                    image: alpine
+                    image: <+CI.variables.SNYK_IMAGE>
                     shell: Sh
                     command: echo 'test'
