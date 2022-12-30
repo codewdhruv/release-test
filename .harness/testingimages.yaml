@@ -1,0 +1,38 @@
+pipeline:
+  name: testing-images
+  identifier: testingimages
+  projectIdentifier: DhrubaTest
+  orgIdentifier: CMETESTING
+  tags: {}
+  properties:
+    ci:
+      codebase:
+        connectorRef: gitconnector
+        repoName: release-test
+        build: <+input>
+  stages:
+    - stage:
+        name: SNYK_IMAGE
+        identifier: SNYK_IMAGE
+        description: ""
+        type: CI
+        spec:
+          cloneCodebase: true
+          infrastructure:
+            type: KubernetesDirect
+            spec:
+              connectorRef: k8scluster
+              namespace: harness-delegate-ng
+              nodeSelector: {}
+              os: Linux
+          execution:
+            steps:
+              - step:
+                  type: Run
+                  name: test
+                  identifier: test
+                  spec:
+                    connectorRef: dockerconnectorharnesscommunity
+                    image: alpine
+                    shell: Sh
+                    command: echo 'test'
