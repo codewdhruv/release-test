@@ -41,3 +41,8 @@ pipeline:
                     privileged: true
                     envVariables:
                       SNYK_TOKEN: <+secrets.getValue("org.SNYK_TOKEN")>N")>
+  variables:
+    - name: SNYK_IMAGE
+      type: String
+      description: ""
+      value: snyk/snyk-cli:1.745.0-maven-3.5.4
