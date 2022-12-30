@@ -39,7 +39,7 @@ pipeline:
                   name: build and push image to docker
                   identifier: build_and_push_image_to_docker
                   spec:
-                    connectorRef: DhrubajyotiDocker
+                    connectorRef: harnesscommunitydocker
                     repo: harnesscommunity/test-release
                     tags:
                       - stable
