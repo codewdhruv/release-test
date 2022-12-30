@@ -39,10 +39,14 @@ pipeline:
                   name: Container Test
                   identifier: Container_Test
                   spec:
+                    connectorRef: harnesscommunitydocker
+                    image: "snyk/snyk:docker-latest\t"
                     shell: Sh
                     command: |-
                       snyk config set api=$SNYK_TOKEN
                       snyk container test harnesscommunity/test-release:latest
+                    envVariables:
+                      SNYK_TOKEN: <+secrets.getValue("SNYK_TOKEN")>N")>
           platform:
             os: Linux
             arch: Amd64
