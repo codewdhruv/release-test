@@ -46,7 +46,7 @@ pipeline:
                       snyk config set api=$SNYK_TOKEN
                       snyk container test harnesscommunity/test-release:latest
                     envVariables:
-                      SNYK_TOKEN: <+secrets.getValue("SNYK_TOKEN")>N")>
+                      SNYK_TOKEN: <+secrets.getValue("SNYK_TOKEN")>
           platform:
             os: Linux
             arch: Amd64
