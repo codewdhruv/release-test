@@ -35,4 +35,9 @@ pipeline:
                     connectorRef: dockerconnectorharnesscommunity
                     image: <+CI.variables.SNYK_IMAGE>
                     shell: Sh
-                    command: echo 'test'
+                    command: |-
+                      snyk config set api= $SNYK_TOKEN
+                      snyk code test || true
+                    privileged: true
+                    envVariables:
+                      SNYK_TOKEN: <+secrets.getValue("org.SNYK_TOKEN")>N")>
