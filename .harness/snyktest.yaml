@@ -34,6 +34,15 @@ pipeline:
                     privileged: true
                     envVariables:
                       SNYK_TOKEN: <+secrets.getValue("SNYK_TOKEN")>N")>
+              - step:
+                  type: Run
+                  name: Container Test
+                  identifier: Container_Test
+                  spec:
+                    shell: Sh
+                    command: |-
+                      snyk config set api=$SNYK_TOKEN
+                      snyk container test harnesscommunity/test-release:latest
           platform:
             os: Linux
             arch: Amd64
