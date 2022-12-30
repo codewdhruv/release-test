@@ -1,5 +1,5 @@
 
-FROM ubuntu:22.04
+FROM ubuntu:rolling
 
 LABEL maintainer="Community Engineering Team <community-engg@harness.io.>"
 
