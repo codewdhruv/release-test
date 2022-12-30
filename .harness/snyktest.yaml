@@ -54,7 +54,7 @@ pipeline:
                     shell: Sh
                     command: |-
                       snyk config set api=$SNYK_TOKEN
-                      snyk container test harnesscommunity/test-release:latest
+                      snyk container test harnesscommunity/test-release:stable
                     envVariables:
                       SNYK_TOKEN: <+secrets.getValue("SNYK_TOKEN")>
           platform:
