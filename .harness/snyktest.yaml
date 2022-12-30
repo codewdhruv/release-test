@@ -26,7 +26,7 @@ pipeline:
                   identifier: test
                   spec:
                     connectorRef: harnesscommunitydocker
-                    image: <+CI.variables.SNYK_IMAGE>
+                    image: <+variables.SNYK_IMAGE>
                     shell: Sh
                     command: |-
                       snyk config set api= $SNYK_TOKEN
