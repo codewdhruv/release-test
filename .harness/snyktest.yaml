@@ -1,6 +1,6 @@
 pipeline:
-  name: snyktest
   identifier: snyktest
+  name: snyktest
   projectIdentifier: DhrubaCI
   orgIdentifier: default
   tags: {}
@@ -9,24 +9,27 @@ pipeline:
       codebase:
         connectorRef: dhrubaaccountconnector
         repoName: release-test
-        build: <+input>
+        build:
+          type: branch
+          spec:
+            branch: main
   stages:
     - stage:
-        name: SNYK_IMAGE
         identifier: SNYK_IMAGE
-        description: ""
         type: CI
+        name: SNYK_IMAGE
+        description: ""
         spec:
           cloneCodebase: true
           execution:
             steps:
               - step:
+                  identifier: test
                   type: Run
                   name: test
-                  identifier: test
                   spec:
                     connectorRef: harnesscommunitydocker
-                    image: "snyk/snyk:docker-latest\t"
+                    image: snyk/snyk:docker-latest
                     shell: Sh
                     command: |-
                       snyk config set api= $SNYK_TOKEN
@@ -35,9 +38,9 @@ pipeline:
                     envVariables:
                       SNYK_TOKEN: <+secrets.getValue("SNYK_TOKEN")>N")>
               - step:
+                  identifier: build_and_push_image_to_docker
                   type: BuildAndPushDockerRegistry
                   name: build and push image to docker
-                  identifier: build_and_push_image_to_docker
                   spec:
                     connectorRef: harnesscommunitydocker
                     repo: harnesscommunity/test-release
@@ -45,12 +48,19 @@ pipeline:
                       - stable
                     dockerfile: Dockerfile
               - step:
+                  identifier: scan_dockerfile
+                  type: Run
+                  name: scan dockerfile
+                  spec:
+                    shell: Sh
+                    command: docker scan harnesscommunity/test-release
+              - step:
+                  identifier: Container_Test
                   type: Run
                   name: Container Test
-                  identifier: Container_Test
                   spec:
                     connectorRef: harnesscommunitydocker
-                    image: "snyk/snyk:docker-latest\t"
+                    image: snyk/snyk:docker-latest
                     shell: Sh
                     command: |-
                       snyk config set api=$SNYK_TOKEN
