@@ -1,93 +1,58 @@
+FROM harnesscommunity/ruby:latest
 
-FROM ubuntu:22.04
+LABEL maintainer="Community & CI Engineering team <community-engg@harness.io>"
 
-LABEL maintainer="Community Engineering Team <community-engg@harness.io.>"
+# Install Selenium
+ENV SELENIUM_VER=3.141.59
+RUN curl -sSL -o selenium-server-standalone-${SELENIUM_VER}.jar "https://selenium-release.storage.googleapis.com/${SELENIUM_VER%.*}/selenium-server-standalone-${SELENIUM_VER}.jar" && \
+    sudo cp selenium-server-standalone-${SELENIUM_VER}.jar /usr/local/bin/selenium.jar && \
+    rm selenium-server-standalone-${SELENIUM_VER}.jar
 
-# Change default shell for RUN from Dash to Bash
-SHELL ["/bin/bash", "-exo", "pipefail", "-c"]
+RUN sudo apt-get update && \
+	sudo apt-get install --yes --no-install-recommends \
+		xvfb \
+	&& \
 
-ENV DEBIAN_FRONTEND=noninteractive \
-    TERM=dumb \
-    PAGER=cat
+    # Install Java only if it's not already available
+    # Java is installed for Selenium
+    if ! command -v java > /dev/null; then \
+        echo "Java not found in parent image, installing..." && \
+        sudo apt-get install -y --no-install-recommends --no-upgrade openjdk-11-jre; \
+    fi && \
+	sudo rm -rf /var/lib/apt/lists/*
 
+# Below is setup to allow xvfb to start when the container starts up.
+# The label in particular allows this image to override what CircleCI does
+# when booting the image.
+LABEL com.circleci.preserve-entrypoint=true
+ENV DISPLAY=":99"
+#RUN	printf '#!/bin/sh\nXvfb :99 -screen 0 1280x1024x24 &\nexec "$@"\n' > /tmp/entrypoint && \
+#	chmod +x /tmp/entrypoint && \
+#	sudo mv /tmp/entrypoint /docker-entrypoint.sh
+RUN	printf '#!/bin/sh\nXvfb :99 -screen 0 1280x1024x24 &\nexec "$@"\n' | sudo tee /docker-entrypoint.sh && \
+	sudo chmod +x /docker-entrypoint.sh
 
-RUN noInstallRecommends="" && \
-	if [[ "22.04" == "22.04" ]]; then \
-		noInstallRecommends="--no-install-recommends"; \
-	fi && \
-	apt-get update && apt-get install -y $noInstallRecommends \
-	    elixir \
-		autoconf \
-		build-essential \
-		ca-certificates \
-		cmake \
-		# already installed but here for consistency
-		curl \
-		gnupg \
-		gzip \
-		jq \
-		libcurl4-openssl-dev \
-		# popular DB lib - MariaDB
-		libmariadb-dev \
-		# allows MySQL users to use MariaDB lib
-		libmariadb-dev-compat \
-		# popular DB lib - PostgreSQL
-		libpq-dev \
-		libssl-dev \
-		libsqlite3-dev \
-		make \
-		python3 \
-		# for ssh-enabled builds
-		net-tools \
-		netcat \
-		openssh-client \
-		parallel \
-		# compiling tool
-		pkg-config \
-		postgresql-client \
-		shellcheck \
-		software-properties-common \
-		# already installed but here for consistency
-		sudo \
-		tar \
-		tzdata \
-		unzip \
-		python3-pip \
-		# for ssh-enabled builds
-		vim \
-		wget \
-		zip && \
-	add-apt-repository ppa:git-core/ppa && apt-get install -y git && \
-	rm -rf /var/lib/apt/lists/*
+# Install a single version of Firefox. This isn't intended to be a regularly
+# updated thing. Instead, if this version of Firefox isn't what the end user
+# wants they should install a different version via the Browser Tools Orb.
+#
+# Canonical made a major technology change in how Firefox is installed from
+# Ubuntu 21.10 and up. The general CI space doesn't seem to be ready for a snap
+# based Firefox right now so we are installing it from the Mozilla PPA.
+RUN echo 'Package: *' | sudo tee -a /etc/apt/preferences.d/firefox.pref && \
+	echo 'Pin: release o=LP-PPA-mozillateam' | sudo tee -a /etc/apt/preferences.d/firefox.pref && \
+	echo 'Pin-Priority: 1001' | sudo tee -a /etc/apt/preferences.d/firefox.pref && \
+	sudo add-apt-repository --yes ppa:mozillateam/ppa && \
+	sudo apt-get install --no-install-recommends --yes firefox && \
+	sudo rm -rf /var/lib/apt/lists/* && \
+	firefox --version
 
-ENV DOCKER_VERSION 5:20.10.18~3-0~ubuntu-
-RUN apt-get update && apt-get install -y \
-		apt-transport-https \
-		ca-certificates \
-		curl \
-		gnupg-agent \
-		software-properties-common && \
-	curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
-	add-apt-repository -y "deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/ubuntu $( lsb_release -cs ) stable" && \
-	apt-get install -y docker-ce=${DOCKER_VERSION}$( lsb_release -cs ) docker-ce-cli=${DOCKER_VERSION}$( lsb_release -cs ) containerd.io && \
-	# Quick test of the Docker install
-	docker --version && \
-	rm -rf /var/lib/apt/lists/*
-
-ENV COMPOSE_VER 2.11.1
-ENV COMPOSE_SWITCH_VERSION 1.0.4
-RUN dockerPluginDir=/usr/local/lib/docker/cli-plugins && \
-	mkdir -p $dockerPluginDir && \
-	curl -sSL "https://github.com/docker/compose/releases/download/v${COMPOSE_VER}/docker-compose-linux-$(uname -m)" -o $dockerPluginDir/docker-compose && \
-	chmod +x $dockerPluginDir/docker-compose && \
-	curl -fL "https://github.com/docker/compose-switch/releases/download/v${COMPOSE_SWITCH_VERSION}/docker-compose-linux-$(dpkg --print-architecture)" -o /usr/local/bin/compose-switch && \
-		
-	docker compose version && \
-	chmod +x /usr/local/bin/compose-switch && \
-	update-alternatives --install /usr/local/bin/docker-compose docker-compose /usr/local/bin/compose-switch 99 && \
-		
-	docker-compose version
-
-RUN curl -sSL "https://github.com/mikefarah/yq/releases/download/v4.27.5/yq_linux_amd64.tar.gz" | \
-	tar -xz -C /usr/local/bin && \
-	mv /usr/local/bin/yq{_linux_amd64,}
+# Install a single version of Google Chrome Stable. This isn't intended to be a
+# regularly updated thing. Instead, if this version of Chrome isn't what the
+# end user wants they should install a different version via the Browser Tools
+# Orb.
+RUN wget -q -O - "https://dl.google.com/linux/linux_signing_key.pub" | sudo apt-key add - && \
+	echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list && \
+	sudo apt-get update && \
+	sudo apt-get install google-chrome-stable && \
+	sudo rm -rf /var/lib/apt/lists/*
