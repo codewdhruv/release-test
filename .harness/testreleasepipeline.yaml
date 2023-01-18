@@ -86,8 +86,6 @@ pipeline:
                   limits:
                     memory: 2.0Gi
                     cpu: "1.0"
-          sharedPaths:
-            - /var/run
           platform:
             os: Linux
             arch: Amd64
