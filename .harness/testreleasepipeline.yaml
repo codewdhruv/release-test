@@ -29,49 +29,34 @@ pipeline:
                     dockerfile: Dockerfile
               - step:
                   type: Security
-                  name: Snyk Container Scan
-                  identifier: Snyk_Container_Scan
+                  name: security scan
+                  identifier: security_scan
                   spec:
                     privileged: true
                     settings:
+                      product_name: release-test
+                      product_config_name: release-test
                       policy_type: orchestratedScan
                       scan_type: container
-                      product_name: snyk
-                      product_config_name: default
-                      container_project: harnesscommunity/test-release
-                      container_tag: <+pipeline.sequenceId>
-                      container_type: local
-                      container_domain: docker.io
+                      container_type: local_image
+                      container_domain: hub.docker.com
+                      container_project: test-release
+                      container_tag: latest
                     imagePullPolicy: Always
-              - parallel:
-                  - step:
-                      type: Security
-                      name: Snyk Test
-                      identifier: Snyk_Test
-                      spec:
-                        privileged: true
-                        settings:
-                          policy_type: orchestratedScan
-                          scan_type: repository
-                          product_name: snyk
-                          product_config_name: default
-                          product_access_token: <+secrets.getValue("org.SNYK_TOKEN")>
-                          repository_project: release-test
-                          repository_branch: main
-                  - step:
-                      type: Run
-                      name: Snyk Code Test
-                      identifier: Snyk_Code_Test
-                      spec:
-                        connectorRef: account.harnessImage
-                        image: <+CI.variables.SNYK_IMAGE>
-                        shell: Sh
-                        command: |-
-                          snyk config set api=$SNYK_TOKEN
-                          snyk code test || true
-                        privileged: true
-                        envVariables:
-                          SNYK_TOKEN: <+secrets.getValue("org.SNYK_TOKEN")>
+              - step:
+                  type: Run
+                  name: Snyk Code Test
+                  identifier: Snyk_Code_Test
+                  spec:
+                    connectorRef: account.harnessImage
+                    image: <+CI.variables.SNYK_IMAGE>
+                    shell: Sh
+                    command: |-
+                      snyk config set api=$SNYK_TOKEN
+                      snyk code test || true
+                    privileged: true
+                    envVariables:
+                      SNYK_TOKEN: <+secrets.getValue("org.SNYK_TOKEN")>
               - step:
                   type: Run
                   name: Build Container
