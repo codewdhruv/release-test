@@ -22,7 +22,7 @@ pipeline:
                   name: Build and Push an image to Docker Registry
                   identifier: Build_and_Push_an_image_to_Docker_Registry
                   spec:
-                    connectorRef: account.harnessImage
+                    connectorRef: harnesscommunitydocker
                     repo: harnesscommunity/test-release
                     tags:
                       - latest
