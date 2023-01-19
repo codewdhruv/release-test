@@ -31,7 +31,7 @@ pipeline:
                   name: runTrivyScan
                   identifier: runTrivy
                   spec:
-                    connectorRef: $DOCKER_HUB_CONNECTOR
+                    connectorRef: DhrubajyotiDocker
                     image: ubuntu:20.04
                     shell: Sh
                     command: |-
