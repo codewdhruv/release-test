@@ -30,7 +30,7 @@ pipeline:
                       scan_type: container
                       container_type: docker_v2
                       container_domain: hub.docker.com
-                      container_project: test-release
+                      container_project: ubuntu
                       container_tag: latest
                     imagePullPolicy: Always
               - step:
