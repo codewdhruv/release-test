@@ -11,14 +11,6 @@ pipeline:
         type: CI
         spec:
           cloneCodebase: true
-          infrastructure:
-            type: KubernetesDirect
-            spec:
-              connectorRef: $K8S_DELEGATE_CONNECTOR
-              namespace: $K8S_DELEGATE_NAMESPACE
-              automountServiceAccountToken: true
-              nodeSelector: {}
-              os: Linux
           sharedPaths:
             - /var/run
             - /shared/customer_artifacts
@@ -72,6 +64,12 @@ pipeline:
                         cpu: 1000m
                   name: ingestTrivyData
                   identifier: aqua_trivy
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+            spec: {}
     - stage:
         variables:
           - name: SNYK_IMAGE
