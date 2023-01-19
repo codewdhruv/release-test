@@ -167,3 +167,4 @@ pipeline:
         connectorRef: dhrubaaccountconnector
         repoName: release-test
         build: <+input>
+  allowStageExecutions: true
