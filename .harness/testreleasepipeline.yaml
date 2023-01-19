@@ -19,7 +19,7 @@ pipeline:
               name: dind
               type: Service
               spec:
-                connectorRef: $DOCKER_HUB_CONNECTOR
+                connectorRef: DhrubajyotiDocker
                 image: docker:dind
                 privileged: true
                 entrypoint:
