@@ -90,7 +90,7 @@ pipeline:
                     privileged: true
                     settings:
                       product_name: aqua-trivy
-                      product_config_name: aqua-trivy
+                      product_config_name: default
                       policy_type: orchestratedScan
                       scan_type: container
                       container_type: docker_v2
