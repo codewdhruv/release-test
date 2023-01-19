@@ -34,8 +34,8 @@ pipeline:
                   spec:
                     privileged: true
                     settings:
-                      product_name: release-test
-                      product_config_name: release-test
+                      product_name: test-release
+                      product_config_name: test-release
                       policy_type: orchestratedScan
                       scan_type: container
                       container_type: local_image
