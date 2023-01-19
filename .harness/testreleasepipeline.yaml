@@ -93,7 +93,7 @@ pipeline:
                       product_config_name: aqua-trivy
                       policy_type: orchestratedScan
                       scan_type: container
-                      container_type: local_image
+                      container_type: docker_v2
                       container_domain: hub.docker.com
                       container_project: harnesscommunity/test-release
                       container_tag: latest
