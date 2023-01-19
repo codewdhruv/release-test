@@ -6,6 +6,73 @@ pipeline:
   tags: {}
   stages:
     - stage:
+        name: build
+        identifier: build
+        type: CI
+        spec:
+          cloneCodebase: true
+          infrastructure:
+            type: KubernetesDirect
+            spec:
+              connectorRef: $K8S_DELEGATE_CONNECTOR
+              namespace: $K8S_DELEGATE_NAMESPACE
+              automountServiceAccountToken: true
+              nodeSelector: {}
+              os: Linux
+          sharedPaths:
+            - /var/run
+            - /shared/customer_artifacts
+          serviceDependencies:
+            - identifier: dind
+              name: dind
+              type: Service
+              spec:
+                connectorRef: $DOCKER_HUB_CONNECTOR
+                image: docker:dind
+                privileged: true
+                entrypoint:
+                  - dockerd-entrypoint.sh
+          execution:
+            steps:
+              - step:
+                  type: Run
+                  name: runTrivyScan
+                  identifier: runTrivy
+                  spec:
+                    connectorRef: $DOCKER_HUB_CONNECTOR
+                    image: ubuntu:20.04
+                    shell: Sh
+                    command: |-
+                      apt-get update -y  
+                      apt-get install wget apt-transport-https gnupg lsb-release -y  
+                      wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | apt-key add -  
+                      echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | tee -a /etc/apt/sources.list.d/trivy.list  
+                      apt-get update -y  
+                      apt-get install trivy -y  
+                      trivy -v  
+                      trivy -q image --timeout 20m -f json -o /shared/customer_artifacts/aqua.json redhat/ubi8-minimal:latest  
+              - step:
+                  type: Security
+                  spec:
+                    privileged: true
+                    settings:
+                      scan_type: container
+                      product_name: aqua-trivy
+                      product_config_name: default
+                      policy_type: ingestionOnly
+                      container_type: docker_v2
+                      container_tag: latest
+                      container_project: redhat/ubi8-minimal
+                      customer_artifacts_path: /shared/customer_artifacts
+                      manual_upload_filename: aqua.json
+                    imagePullPolicy: Always
+                    resources:
+                      limits:
+                        memory: 1024Mi
+                        cpu: 1000m
+                  name: ingestTrivyData
+                  identifier: aqua_trivy
+    - stage:
         variables:
           - name: SNYK_IMAGE
             type: String
