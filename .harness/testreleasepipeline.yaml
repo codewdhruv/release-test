@@ -18,16 +18,6 @@ pipeline:
           execution:
             steps:
               - step:
-                  type: BuildAndPushDockerRegistry
-                  name: Build and Push an image to Docker Registry
-                  identifier: Build_and_Push_an_image_to_Docker_Registry
-                  spec:
-                    connectorRef: harnesscommunitydocker
-                    repo: harnesscommunity/test-release
-                    tags:
-                      - latest
-                    dockerfile: Dockerfile
-              - step:
                   type: Security
                   name: security scan
                   identifier: security_scan
@@ -43,6 +33,16 @@ pipeline:
                       container_project: test-release
                       container_tag: latest
                     imagePullPolicy: Always
+              - step:
+                  type: BuildAndPushDockerRegistry
+                  name: Build and Push an image to Docker Registry
+                  identifier: Build_and_Push_an_image_to_Docker_Registry
+                  spec:
+                    connectorRef: harnesscommunitydocker
+                    repo: harnesscommunity/test-release
+                    tags:
+                      - latest
+                    dockerfile: Dockerfile
               - step:
                   type: Run
                   name: Snyk Code Test
