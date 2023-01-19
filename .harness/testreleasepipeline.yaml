@@ -95,7 +95,7 @@ pipeline:
                       scan_type: container
                       container_type: docker_v2
                       container_domain: hub.docker.com
-                      container_project: harnesscommunity/test-release
+                      container_project: redhat/ubi8-minimal
                       container_tag: latest
                       container_access_token: <+secrets.getValue("harnesscommunitydockerpassword")>
                       container_access_id: harnesscommunity
