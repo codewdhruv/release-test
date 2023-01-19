@@ -14,7 +14,6 @@ pipeline:
     - stage:
         name: Trivy Scan
         identifier: Trivy_Scan
-        description: ""
         type: CI
         spec:
           cloneCodebase: true
@@ -26,21 +25,6 @@ pipeline:
             spec: {}
           execution:
             steps:
-              - step:
-                  type: Run
-                  name: runTrivyScan
-                  identifier: runTrivyScan
-                  spec:
-                    shell: Sh
-                    command: |-
-                      apt-get update -y  
-                      apt-get install wget apt-transport-https gnupg lsb-release -y  
-                      wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | apt-key add -  
-                      echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | tee -a /etc/apt/sources.list.d/trivy.list  
-                      apt-get update -y  
-                      apt-get install trivy -y  
-                      trivy -v  
-                      trivy -q image --timeout 20m -f json -o /shared/customer_artifacts/aqua.json redhat/ubi8-minimal:latest  
               - step:
                   type: Security
                   name: "test trivy "
