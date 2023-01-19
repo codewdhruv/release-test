@@ -97,6 +97,8 @@ pipeline:
                       container_domain: hub.docker.com
                       container_project: harnesscommunity/test-release
                       container_tag: latest
+                      container_access_token: <+secrets.getValue("harnesscommunitydockerpassword")>
+                      container_access_id: harnesscommunity
                     imagePullPolicy: Always
               - step:
                   type: BuildAndPushDockerRegistry
