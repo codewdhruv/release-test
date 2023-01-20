@@ -51,3 +51,4 @@ pipeline:
                     tags:
                       - latest
                     dockerfile: Dockerfile
+  allowStageExecutions: true
